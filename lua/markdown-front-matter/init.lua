@@ -1,5 +1,7 @@
 local M = {}
 
+local flag = "<!-- markdown auto front matter -->"
+
 local function kebab_case(filename)
   return filename:lower()
     :gsub("%s+", "-")
@@ -20,7 +22,6 @@ function M.insert_frontmatter()
   local bufname = vim.api.nvim_buf_get_name(0)
   local filename = vim.fn.fnamemodify(bufname, ":t:r")
   local slug = kebab_case(filename)
-  
   local datetime = get_iso_time()
   
   local frontmatter = {
@@ -33,9 +34,10 @@ function M.insert_frontmatter()
     'weight: 1',
     'categories:',
     'tags:',
-    "---",
     "",
-    "<!-- markdown front matter -->"
+    flag,
+    "---"
+    "",
   }
   
   vim.api.nvim_buf_set_lines(0, 0, 0, false, frontmatter)
@@ -46,7 +48,7 @@ local function update_lastmod()
   local datetime = M.get_iso_time()
   
   for i, line in ipairs(content) do
-    if line:match("<!-- markdown front matter -->") then
+    if line:match(flag) then
       for j = i, 1, -1 do
         if content[j]:match("^lastmod:") then
           content[j] = string.format('lastmod: "%s"', datetime)
@@ -59,18 +61,17 @@ local function update_lastmod()
 end
 
 local function setup()
-  -- 自动更新lastmod
   vim.api.nvim_create_autocmd("BufWritePre", {
     pattern = "*.md",
     callback = function()
       local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
-      if #lines > 10 and lines[#lines] == "<!-- markdown front matter -->" then
+      for _, line in ipairs(lines) do
+        if line:match(flag) then
         update_lastmod()
       end
     end
   })
 
-  -- 初始化命令
   vim.api.nvim_create_user_command("MarkdownFrontMatterInit", function()
     local lines = vim.api.nvim_buf_get_lines(0, 0, 1, false)
     if #lines > 0 and lines[1]:match("^%-%-%-") then
