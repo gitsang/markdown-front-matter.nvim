@@ -33,7 +33,8 @@ function M.insert_frontmatter()
     'weight: 1',
     'categories:',
     'tags:',
-    "---\n",
+    "---",
+    ""
   }
   
   vim.api.nvim_buf_set_lines(0, 0, 0, false, frontmatter)
