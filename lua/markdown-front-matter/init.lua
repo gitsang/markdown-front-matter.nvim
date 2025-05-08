@@ -34,13 +34,43 @@ function M.insert_frontmatter()
     'categories:',
     'tags:',
     "---",
-    ""
+    "",
+    "<!-- markdown front matter -->"
   }
   
   vim.api.nvim_buf_set_lines(0, 0, 0, false, frontmatter)
 end
 
+local function update_lastmod()
+  local content = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+  local datetime = M.get_iso_time()
+  
+  for i, line in ipairs(content) do
+    if line:match("<!-- markdown front matter -->") then
+      for j = i, 1, -1 do
+        if content[j]:match("^lastmod:") then
+          content[j] = string.format('lastmod: "%s"', datetime)
+          vim.api.nvim_buf_set_lines(0, 0, -1, false, content)
+          return
+        end
+      end
+    end
+  end
+end
+
 local function setup()
+  -- 自动更新lastmod
+  vim.api.nvim_create_autocmd("BufWritePre", {
+    pattern = "*.md",
+    callback = function()
+      local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+      if #lines > 10 and lines[#lines] == "<!-- markdown front matter -->" then
+        update_lastmod()
+      end
+    end
+  })
+
+  -- 初始化命令
   vim.api.nvim_create_user_command("MarkdownFrontMatterInit", function()
     local lines = vim.api.nvim_buf_get_lines(0, 0, 1, false)
     if #lines > 0 and lines[1]:match("^%-%-%-") then
