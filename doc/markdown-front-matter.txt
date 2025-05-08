@@ -1,0 +1,53 @@
+*markdown-front-matter.txt*  Markdown Front Matter插件文档
+
+==============================================================================
+命令列表                                                      *md-frontmatter-commands*
+
+:MarkdownFrontMatterInit
+    在当前Markdown文件顶部插入Front Matter模板，包含以下字段：
+    - title: 标题（默认为空）
+    - slug: 基于文件名生成的kebab-case格式
+    - description: 描述（默认为空）
+    - date: 当前时间（ISO 8601格式，+08:00时区）
+    - lastmod: 最后修改时间（同date格式）
+    - weight: 权重（默认1）
+    - categories: 分类（需手动填写）
+    - tags: 标签（需手动填写）
+
+==============================================================================
+功能特性                                                  *md-frontmatter-features*
+
+1. 自动生成slug规则：
+   - 转换为小写
+   - 替换空格和下划线为连字符
+   - 移除非字母数字字符
+   - 合并连续连字符
+   - 去除首尾连字符
+
+2. 时间格式：
+   - 自动生成符合ISO 8601标准的时间戳
+   - 包含+08:00时区信息
+   - 精确到秒级时间
+
+3. 安全检测：
+   - 如果文件已存在Front Matter（首行为---）
+   - 会提示"Front Matter already exists"并中止操作
+
+==============================================================================
+安装指南                                                  *md-frontmatter-installation*
+
+1. 通过包管理器安装（推荐）：
+```lua
+-- packer.nvim
+use {
+  'gitsang/markdown-front-matter.nvim',
+  config = function()
+    require('markdown-front-matter').setup()
+  end
+}
+```
+
+2. 手动安装：
+将插件目录放置于runtimepath后添加配置：
+```lua
+require('markdown-front-matter').setup()
