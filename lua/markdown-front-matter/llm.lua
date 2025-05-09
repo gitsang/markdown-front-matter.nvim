@@ -13,14 +13,13 @@ local function call_openai(prompt, opts)
     prompt:gsub('"', '\\"'):gsub("'", "\'\'"):gsub('\n', '\\n')
   )
 
-  vim.notify("[MarkdownFrontMatter] cmd" .. curl_cmd, vim.log.levels.INFO)
+  vim.notify("[MarkdownFrontMatter] " .. curl_cmd, vim.log.levels.DEBUG)
   local handle = io.popen(curl_cmd)
   if not handle then
     return nil, "Failed to execute curl command"
   end
 
   local result = handle:read("*a")
-  vim.notify("[MarkdownFrontMatter] result " .. result, vim.log.levels.INFO)
   handle:close()
 
   local success, response = pcall(vim.json.decode, result)
@@ -71,8 +70,13 @@ Here's the content:
     return nil, err
   end
 
+  -- Check if the response is wrapped in code blocks and extract it
+  local json_str = response
+  -- Remove markdown code blocks if present (matches ```json\n...\n``` or just ```\n...\n```)
+  json_str = json_str:match("```[%w]*\n(.-)```") or json_str
   -- Extract JSON from the response (in case the LLM returns additional text)
-  local json_str = response:match("{.-}%s*$") or response
+  json_str = response:match("{.-}%s*$") or response
+
   -- Parse the JSON response
   local success, parsed = pcall(vim.json.decode, json_str)
   if not success then
