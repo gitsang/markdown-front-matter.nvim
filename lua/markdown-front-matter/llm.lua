@@ -22,6 +22,7 @@ local function call_openai(prompt, opts)
   handle:close()
 
   local success, response = pcall(vim.json.decode, result)
+  vim.notify("[MarkdownFrontMatter] OpenAI API response: " .. result, vim.log.levels.INFO)
   if not success or not response.choices or not response.choices[1] then
     return nil, "Failed to parse API response"
   end
