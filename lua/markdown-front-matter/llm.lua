@@ -47,11 +47,7 @@ function M.generate_description(content, opts)
   -- Create a prompt for the LLM to generate a description
   local prompt = "Please generate a short description (1-2 sentences) of the following markdown content:\n\n" .. content
 
-  if provider == "openai" then
-    return call_openai(prompt, provider_opts)
-  else
-    return nil, "Unsupported LLM provider: " .. provider
-  end
+  return call_openai(prompt, provider_opts)
 end
 
 return M
