@@ -1,6 +1,6 @@
 local M = {}
 local util = require("markdown-front-matter.util")
-local yaml = require('plenary.filetype.yaml')
+local lyaml = require('lyaml')
 
 local auto_update_flag = "<!-- markdown-front-matter auto -->"
 local front_matter_state = {
@@ -56,9 +56,9 @@ function M.get_front_matter_state()
       end
     end
 
-    -- YAML Unmarshal
+    -- YAML Unmarshal using lyaml
     local yaml_content = table.concat(yaml_lines, '\n')
-    local success, parsed_data = pcall(yaml.parse, yaml_content)
+    local success, parsed_data = pcall(lyaml.load, yaml_content)
 
     if success and parsed_data then
       -- Merge parsed data into state
@@ -84,8 +84,8 @@ function M.generate_front_matter_content()
     end
   end
 
-  -- Convert the data to YAML format using plenary
-  local yaml_content = yaml.stringify(yaml_data)
+  -- Convert the data to YAML format using lyaml
+  local yaml_content = lyaml.dump({yaml_data})
 
   -- Create the front matter with delimiters
   local lines = {"---"}

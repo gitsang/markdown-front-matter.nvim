@@ -9,21 +9,21 @@ A Neovim plugin for automated Markdown front matter generation and management.
 - **Intelligent Formatting**:
   - Auto-generated slugs in kebab-case from filenames
   - ISO 8601 compliant dates with timezone information
-  - YAML-compliant formatting using plenary.nvim
+  - YAML-compliant formatting using lyaml
 
 ## 2. Installation
 
 ### 2.1 Requirements
 
 - Neovim >= 0.8.0
-- [plenary.nvim](https://github.com/nvim-lua/plenary.nvim)
+- [gvvaughan/lyaml](https://github.com/gvvaughan/lyaml)
 
 ### 2.2 Using [packer.nvim](https://github.com/wbthomason/packer.nvim)
 
 ```lua
 use {
   'gitsang/markdown-front-matter.nvim',
-  requires = {'nvim-lua/plenary.nvim'},
+  requires = {'gvvaughan/lyaml'},
   config = function()
     require('markdown-front-matter').setup()
   end
@@ -35,7 +35,7 @@ use {
 ```lua
 {
   'gitsang/markdown-front-matter.nvim',
-  dependencies = {'nvim-lua/plenary.nvim'},
+  dependencies = {'gvvaughan/lyaml'},
   config = function()
     require('markdown-front-matter').setup()
   end

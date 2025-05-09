@@ -36,7 +36,7 @@ FEATURES                                                  *md-frontmatter-featur
    - Supports auto-update feature with the marker: <!-- markdown-front-matter auto -->
 
 4. YAML Support:
-   - Uses plenary.nvim's YAML parser for proper formatting
+   - Uses lyaml for YAML parsing and formatting
    - Maintains consistent YAML structure
 
 ==============================================================================
@@ -48,7 +48,7 @@ INSTALLATION                                           *md-frontmatter-installat
 -- packer.nvim
 use {
   'gitsang/markdown-front-matter.nvim',
-  requires = {'nvim-lua/plenary.nvim'},  -- Required dependency
+  requires = {'gvvaughan/lyaml'},  -- Required dependency
   config = function()
     require('markdown-front-matter').setup()
   end
@@ -57,7 +57,7 @@ use {
 -- lazy.nvim
 {
   'gitsang/markdown-front-matter.nvim',
-  dependencies = {'nvim-lua/plenary.nvim'},
+  dependencies = {'gvvaughan/lyaml'},
   config = function()
     require('markdown-front-matter').setup()
   end
@@ -66,9 +66,8 @@ use {
 
 2. Manual installation:
 
-Place the plugin directory in your runtimepath, install plenary.nvim,
+Place the plugin directory in your runtimepath, install lyaml,
 and add the configuration:
 ```lua
 require('markdown-front-matter').setup()
 ```
-
