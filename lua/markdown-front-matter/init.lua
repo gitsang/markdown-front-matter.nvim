@@ -137,6 +137,7 @@ function M.update_front_matter_state()
   front_matter_state.lastmod = util.get_iso_time()
 
   -- Generate description using LLM if description is empty or auto update is enabled
+  vim.notify("[MarkdownFrontMatter] Generating description using LLM", vim.log.levels.INFO)
   if front_matter_state.description == "" or M.opts.always_update_description then
     vim.notify("[MarkdownFrontMatter] Generating description using LLM", vim.log.levels.INFO)
     local content = table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, false), "\n")
