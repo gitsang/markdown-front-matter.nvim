@@ -10,7 +10,7 @@ local function call_openai(prompt, opts)
     opts.base_url,
     opts.api_key,
     opts.model,
-    vim.json.encode(prompt):sub(2, -2)
+    vim.json.decode(prompt)
   )
 
   vim.notify("[MarkdownFrontMatter] " .. curl_cmd, vim.log.levels.DEBUG)
