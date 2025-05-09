@@ -137,7 +137,9 @@ function M.update_front_matter_state()
   front_matter_state.lastmod = util.get_iso_time()
 
   -- Generate description using LLM if description is empty or auto update is enabled
-  if front_matter_state.description == "" or M.opts.always_update_description then
+  if front_matter_state.description == ""
+    or type(front_matter_state.description) == "table"
+    or M.opts.always_update_description then
     local content = table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, false), "\n")
 
     -- Remove the front matter to avoid confusing the LLM
