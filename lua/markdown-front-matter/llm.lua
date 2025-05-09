@@ -72,8 +72,6 @@ Here's the content:
 
   -- Check if the response is wrapped in code blocks and extract it
   local json_str = response
-  -- Remove markdown code blocks if present (matches ```json\n...\n``` or just ```\n...\n```)
-  json_str = json_str:match("```[%w]*%s*(.-)%s*```") or json_str
   -- Extract JSON from the response (in case the LLM returns additional text)
   json_str = response:match("{.-}%s*$") or response
 
