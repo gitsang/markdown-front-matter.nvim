@@ -93,23 +93,32 @@ function M.get_front_matter_state()
 end
 
 function M.generate_front_matter_content()
-  -- Create a copy of front_matter_state without the `_` prefix field
-  local yaml_data = {}
-  for k, v in pairs(front_matter_state) do
-    if not k:match("^_") then
-      yaml_data[k] = v
-    end
-  end
-
-  -- Convert the data to YAML format using our custom yaml module
-  local yaml_content = yaml.dump({yaml_data})  -- Using custom yaml.dump
+  -- Define the order of fields
+  local field_order = {
+    "title",
+    "slug",
+    "description",
+    "date",
+    "lastmod",
+    "weight",
+    "categories",
+    "tags"
+  }
 
   -- Create the front matter with delimiters
   local lines = {"---"}
 
-  -- Add yaml content, splitting by newlines
-  for line in string.gmatch(yaml_content, "[^\r\n]+") do
-    table.insert(lines, line)
+  -- Add fields in the specified order
+  for _, key in ipairs(field_order) do
+    local value = front_matter_state[key]
+    if value ~= nil then
+      -- Let the YAML module handle individual field serialization
+      local field_yaml = yaml.dump({[key] = value})
+      -- Remove the document start/end markers from the field yaml
+      field_yaml = field_yaml:gsub("^%-%-%-\n", ""):gsub("\n%.%.%.$", "")
+      -- Add the field to our lines
+      table.insert(lines, field_yaml)
+    end
   end
 
   -- Add auto update flag if needed
