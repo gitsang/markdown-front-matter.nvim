@@ -72,13 +72,15 @@ Here's the content:
 
   -- Check if the response is wrapped in code blocks and extract it
   local json_str = response
-  -- Extract JSON from the response (in case the LLM returns additional text)
-  json_str = response:match("{.-}%s*$") or response
+-- Extract JSON from the response, handling markdown code blocks
+  local stripped = json_str:gsub("```json%s*", ""):gsub("```%s*$", ""):gsub("```%s*", "")
+  -- Further clean up any remaining special characters that might interfere with JSON parsing
+  stripped = stripped:gsub("│", ""):gsub("^%s*", ""):gsub("%s*$", "")
 
   -- Parse the JSON response
-  local success, parsed = pcall(vim.json.decode, json_str)
+  local success, parsed = pcall(vim.json.decode, stripped)
   if not success then
-    return nil, "Failed to parse JSON response: " .. json_str
+    return nil, "Failed to parse JSON response: " .. stripped
   end
 
   return parsed
