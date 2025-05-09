@@ -1,53 +1,74 @@
-*markdown-front-matter.txt*  Markdown Front Matter插件文档
+*markdown-front-matter.txt*  Documentation for Markdown Front Matter plugin
 
 ==============================================================================
-命令列表                                                      *md-frontmatter-commands*
+COMMANDS                                                    *md-frontmatter-commands*
 
-:MarkdownFrontMatterInit
-    在当前Markdown文件顶部插入Front Matter模板，包含以下字段：
-    - title: 标题（默认为空）
-    - slug: 基于文件名生成的kebab-case格式
-    - description: 描述（默认为空）
-    - date: 当前时间（ISO 8601格式，+08:00时区）
-    - lastmod: 最后修改时间（同date格式）
-    - weight: 权重（默认1）
-    - categories: 分类（需手动填写）
-    - tags: 标签（需手动填写）
-
-==============================================================================
-功能特性                                                  *md-frontmatter-features*
-
-1. 自动生成slug规则：
-   - 转换为小写
-   - 替换空格和下划线为连字符
-   - 移除非字母数字字符
-   - 合并连续连字符
-   - 去除首尾连字符
-
-2. 时间格式：
-   - 自动生成符合ISO 8601标准的时间戳
-   - 包含+08:00时区信息
-   - 精确到秒级时间
-
-3. 安全检测：
-   - 如果文件已存在Front Matter（首行为---）
-   - 会提示"Front Matter already exists"并中止操作
+:MarkdownFrontMatter
+    Updates the front matter in the current Markdown file or creates it if it 
+    doesn't exist. Includes the following fields:
+    - title: Title (default empty)
+    - slug: Generated in kebab-case format based on the filename
+    - description: Description (default empty)
+    - date: Current time (ISO 8601 format, +08:00 timezone)
+    - lastmod: Last modification time (same format as date)
+    - weight: Weight (default 1)
+    - categories: Categories (empty array by default)
+    - tags: Tags (empty array by default)
 
 ==============================================================================
-安装指南                                                  *md-frontmatter-installation*
+FEATURES                                                  *md-frontmatter-features*
 
-1. 通过包管理器安装（推荐）：
+1. Automatic slug generation rules:
+   - Converts to lowercase
+   - Replaces spaces and underscores with hyphens
+   - Removes non-alphanumeric characters
+   - Merges consecutive hyphens
+   - Trims leading and trailing hyphens
+
+2. Time format:
+   - Automatically generates timestamps compliant with ISO 8601 standard
+   - Includes +08:00 timezone information
+   - Precise to the second
+
+3. Front Matter Detection:
+   - Automatically detects existing front matter (between --- delimiters)
+   - Updates existing front matter preserving its structure
+   - Supports auto-update feature with the marker: <!-- markdown-front-matter auto -->
+
+4. YAML Support:
+   - Uses plenary.nvim's YAML parser for proper formatting
+   - Maintains consistent YAML structure
+
+==============================================================================
+INSTALLATION                                           *md-frontmatter-installation*
+
+1. Via package manager (recommended):
+
 ```lua
 -- packer.nvim
 use {
   'gitsang/markdown-front-matter.nvim',
+  requires = {'nvim-lua/plenary.nvim'},  -- Required dependency
+  config = function()
+    require('markdown-front-matter').setup()
+  end
+}
+
+-- lazy.nvim
+{
+  'gitsang/markdown-front-matter.nvim',
+  dependencies = {'nvim-lua/plenary.nvim'},
   config = function()
     require('markdown-front-matter').setup()
   end
 }
 ```
 
-2. 手动安装：
-将插件目录放置于runtimepath后添加配置：
+2. Manual installation:
+
+Place the plugin directory in your runtimepath, install plenary.nvim,
+and add the configuration:
 ```lua
 require('markdown-front-matter').setup()
+```
+
