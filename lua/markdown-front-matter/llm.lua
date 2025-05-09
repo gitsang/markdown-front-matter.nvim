@@ -6,7 +6,7 @@ local function call_openai(prompt, opts)
     'curl -s -X POST "%s" '..
     '-H "Content-Type: application/json" '..
     '-H "Authorization: Bearer %s" '..
-    '-d \'{"model":"%s","messages":[{"role":"user","content":"%s"}]}\' ',
+    '-d \'{"model":"%s","messages":[{"role":"user","content":"Hi"}]}\' ',
     opts.base_url,
     opts.api_key,
     opts.model,
