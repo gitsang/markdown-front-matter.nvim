@@ -38,6 +38,7 @@ function M.load_front_matter_state()
   -- Find front matter boundaries
   for i, line in ipairs(content) do
     if line:match(front_matter_flag) then
+      vim.notify("Found front matter flag at line " .. i, vim.log.levels.INFO)
       front_matter_state._flag_line = i
       break
     end
@@ -105,6 +106,7 @@ function M.generate_front_matter_content()
   table.insert(lines, "---")
   table.insert(lines, "")
   table.insert(lines, front_matter_flag)
+  table.insert(lines, "")
 
   return lines
 end
