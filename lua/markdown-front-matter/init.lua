@@ -29,7 +29,6 @@ M.opts = {
       }
     }
   },
-  always_update_description = false,  -- Set to true to always update description regardless of existing content
 }
 
 function M.get_front_matter_state()
@@ -125,37 +124,30 @@ function M.generate_front_matter_content()
 end
 
 function M.update_front_matter_state()
-  -- Update front_matter_state
   front_matter_state.slug = util.kebab_case(vim.fn.expand("%:t:r"))
 
-  -- Update date if empty
   if front_matter_state.date == "" or type(front_matter_state.date) == "table" then
     front_matter_state.date = util.get_iso_time()
   end
-
-  -- Update lastmod
   front_matter_state.lastmod = util.get_iso_time()
 
-  -- Generate description using LLM if description is empty or auto update is enabled
-  if front_matter_state.description == ""
-    or type(front_matter_state.description) == "table"
-    or M.opts.always_update_description then
-    local content = table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, false), "\n")
-
-    -- Remove the front matter to avoid confusing the LLM
-    local clean_content = content
-    if front_matter_state._end_line > 0 then
-      clean_content = table.concat(
-        vim.api.nvim_buf_get_lines(0, front_matter_state._end_line, -1, false),
-        "\n"
-      )
+  -- Generate metadata using LLM
+  local content = table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, false), "\n")
+  local metadata, err = llm.generate_metadata(content, M.opts)
+  if metadata == nil or err ~= nil then
+    vim.notify("[MarkdownFrontMatter] Failed to generate metadata: " .. err, vim.log.levels.ERROR)
+  else
+    if front_matter_state.title == "" or type(front_matter_state.title) == "table" then
+      front_matter_state.title = metadata.title:gsub("\n", " "):gsub("^%s*(.-)%s*$", "%1")
     end
-
-    local description, err = llm.generate_description(clean_content, M.opts)
-    if err or not description then
-      vim.notify("[MarkdownFrontMatter] Error generating description: " .. (err or "unknown error"), vim.log.levels.WARN)
-    else
-      front_matter_state.description = description:gsub("\n", " "):gsub("^%s*(.-)%s*$", "%1")
+    if front_matter_state.description == "" or type(front_matter_state.description) == "table" then
+      front_matter_state.description = metadata.description:gsub("\n", " "):gsub("^%s*(.-)%s*$", "%1")
+    end
+    if front_matter_state.categories == {} or type(front_matter_state.categories) == "table" then
+      front_matter_state.categories = metadata.categories
+    end
+    if front_matter_state.tags == {} or type(front_matter_state.tags) == "table" then
+      front_matter_state.tags = metadata.tags
     end
   end
 end
