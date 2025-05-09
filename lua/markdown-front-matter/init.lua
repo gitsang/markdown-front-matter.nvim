@@ -4,19 +4,7 @@ local yaml = require("markdown-front-matter.yaml")
 local llm = require("markdown-front-matter.llm")
 
 local auto_update_flag = "<!-- markdown-front-matter auto -->"
-local front_matter_state = {
-  title = "",
-  slug = "",
-  description = "",
-  date = "",
-  lastmod = "",
-  weight = 1,
-  categories = {},
-  tags = {},
-  _start_line = 1,
-  _end_line = 0,
-  _auto_update = true,
-};
+local front_matter_state = {};
 
 M.opts = {
   llm = {
@@ -31,11 +19,23 @@ M.opts = {
   },
 }
 
-function M.get_front_matter_state()
+function M.load_front_matter_state()
   local content = vim.api.nvim_buf_get_lines(0, 0, -1, false)
 
   -- Initialize front_matter_state with default values
-  local state = front_matter_state
+  front_matter_state = {
+    title = "",
+    slug = "",
+    description = "",
+    date = "",
+    lastmod = "",
+    weight = 1,
+    categories = {},
+    tags = {},
+    _start_line = 1,
+    _end_line = 0,
+    _auto_update = true,
+  }
 
   -- Find front matter boundaries
   local front_matter_start = nil
@@ -45,7 +45,7 @@ function M.get_front_matter_state()
       if front_matter_start == nil then
         front_matter_start = i
         if front_matter_start ~= 1 then
-          return state -- Return default state if no front matter found
+          return
         end
       else
         front_matter_end = i
@@ -57,8 +57,8 @@ function M.get_front_matter_state()
   -- If boundaries are found
   if front_matter_start and front_matter_end and front_matter_end > front_matter_start then
     -- Update boundary information
-    state._start_line = front_matter_start
-    state._end_line = front_matter_end
+    front_matter_state._start_line = front_matter_start
+    front_matter_state._end_line = front_matter_end
 
     -- Extract YAML content
     local yaml_lines = {}
@@ -67,7 +67,7 @@ function M.get_front_matter_state()
       local line = content[i]
       -- Check for auto update flag
       if line:match(auto_update_flag) then
-        state._auto_update = true
+        front_matter_state._auto_update = true
       else
         table.insert(yaml_lines, line)
       end
@@ -80,16 +80,12 @@ function M.get_front_matter_state()
     if success and parsed_data then
       -- Merge parsed data into state
       for k, v in pairs(parsed_data) do
-        state[k] = v
+        front_matter_state[k] = v
       end
-      return state
     else
       vim.notify("YAML parsing error, using default values", vim.log.levels.WARN)
-      return state
     end
   end
-
-  return state -- Return default state if no front matter found
 end
 
 function M.generate_front_matter_content()
@@ -172,10 +168,10 @@ function M.update_front_matter_state()
 end
 
 function M.write_front_matter()
-  local state = M.get_front_matter_state()
+  M.load_front_matter_state()
   M.update_front_matter_state()
   local lines = M.generate_front_matter_content()
-  vim.api.nvim_buf_set_lines(0, state._start_line - 1, state._end_line, false, lines)
+  vim.api.nvim_buf_set_lines(0, front_matter_state._start_line - 1, front_matter_state._end_line, false, lines)
   vim.notify("[MarkdownFrontMatter] Front matter updated", vim.log.levels.INFO)
 end
 
