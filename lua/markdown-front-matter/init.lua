@@ -102,7 +102,6 @@ function M.generate_front_matter_content()
   end
 
   table.insert(lines, "---")
-  table.insert(lines, "")
 
   return lines
 end
@@ -110,7 +109,7 @@ end
 function M.write_front_matter()
   local state = M.get_front_matter_state()
   local lines = M.generate_front_matter_content()
-  vim.api.nvim_buf_set_lines(0, state._start_line, state._end_line, false, lines)
+  vim.api.nvim_buf_set_lines(0, state._start_line - 1, state._end_line, false, lines)
   vim.notify("[MarkdownFrontMatter] Front matter updated", vim.log.levels.INFO)
 end
 
