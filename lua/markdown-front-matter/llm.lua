@@ -10,7 +10,7 @@ local function call_openai(prompt, opts)
     opts.base_url,
     opts.api_key,
     opts.model,
-    prompt:gsub('"', '\\"'):gsub('\n', '\\n')
+    prompt:gsub('"', '\\"'):gsub("'", "\'\'"):gsub('\n', '\\n')
   )
 
   vim.notify("[MarkdownFrontMatter] cmd" .. curl_cmd, vim.log.levels.INFO)
