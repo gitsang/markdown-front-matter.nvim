@@ -109,8 +109,22 @@ function M.generate_front_matter_content()
   return lines
 end
 
+function M.update_front_matter_state()
+  -- Update front_matter_state
+  front_matter_state.slug = util.kebab_case(vim.fn.expand("%:t:r"))
+
+  -- Update date if empty
+  if front_matter_state.date == "" then
+    front_matter_state.date = util.get_iso_time()
+  end
+
+  -- Update lastmod
+  front_matter_state.lastmod = util.get_iso_time()
+end
+
 function M.write_front_matter()
   local state = M.get_front_matter_state()
+  M.update_front_matter_state()
   local lines = M.generate_front_matter_content()
   vim.api.nvim_buf_set_lines(0, state._start_line - 1, state._end_line, false, lines)
   vim.notify("[MarkdownFrontMatter] Front matter updated", vim.log.levels.INFO)
