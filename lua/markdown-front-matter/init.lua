@@ -120,13 +120,12 @@ function M.generate_front_matter_content()
     end
   end
 
+  table.insert(lines, "---")
+
   -- Add auto update flag if needed
   if front_matter_state["_auto_update"] then
-    table.insert(lines, "")
     table.insert(lines, auto_update_flag)
   end
-
-  table.insert(lines, "---")
 
   return lines
 end
