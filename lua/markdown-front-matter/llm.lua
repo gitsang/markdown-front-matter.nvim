@@ -6,19 +6,21 @@ local function call_openai(prompt, opts)
     'curl -s -X POST "%s" '..
     '-H "Content-Type: application/json" '..
     '-H "Authorization: Bearer %s" '..
-    '-d \'{"model":"%s","messages":[{"role":"user","content":"Hi"}]}\' ',
+    '-d \'{"model":"%s","messages":[{"role":"user","content":"%s"}]}\' ',
     opts.base_url,
     opts.api_key,
     opts.model,
     prompt:gsub('"', '\\"'):gsub('\n', '\\n')
   )
 
+  vim.notify("[MarkdownFrontMatter] cmd" .. curl_cmd, vim.log.levels.INFO)
   local handle = io.popen(curl_cmd)
   if not handle then
     return nil, "Failed to execute curl command"
   end
 
   local result = handle:read("*a")
+  vim.notify("[MarkdownFrontMatter] result " .. result, vim.log.levels.INFO)
   handle:close()
 
   local success, response = pcall(vim.json.decode, result)
