@@ -3,7 +3,7 @@ local util = require("markdown-front-matter.util")
 local yaml = require("markdown-front-matter.yaml")
 local llm = require("markdown-front-matter.llm")
 
-local auto_update_flag = "<!-- markdown-front-matter auto -->"
+local front_matter_flag = "<!-- markdown-front-matter -->"
 local front_matter_state = {};
 
 M.opts = {
@@ -34,23 +34,18 @@ function M.load_front_matter_state()
     tags = {},
     _start_line = 1,
     _end_line = 0,
-    _auto_update = true,
   }
 
   -- Find front matter boundaries
   local front_matter_start = nil
   local front_matter_end = nil
   for i, line in ipairs(content) do
-    if line:match("^%-%-%-") then
-      if front_matter_start == nil then
-        front_matter_start = i
-        if front_matter_start ~= 1 then
-          return
-        end
-      else
-        front_matter_end = i
-        break
-      end
+    if i == 1 and not line:match("^%-%-%-") then
+      return
+    end
+    if line:match(front_matter_flag) then
+      front_matter_end = i
+      break
     end
   end
 
@@ -65,10 +60,7 @@ function M.load_front_matter_state()
 
     for i = front_matter_start + 1, front_matter_end - 1 do
       local line = content[i]
-      -- Check for auto update flag
-      if line:match(auto_update_flag) then
-        front_matter_state._auto_update = true
-      else
+      if not line:match(front_matter_flag) then
         table.insert(yaml_lines, line)
       end
     end
@@ -122,10 +114,7 @@ function M.generate_front_matter_content()
 
   table.insert(lines, "---")
 
-  -- Add auto update flag if needed
-  if front_matter_state["_auto_update"] then
-    table.insert(lines, auto_update_flag)
-  end
+  table.insert(lines, front_matter_flag)
 
   return lines
 end
