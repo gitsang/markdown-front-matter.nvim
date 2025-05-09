@@ -17,6 +17,20 @@ local front_matter_state = {
   _auto_update = true,
 };
 
+M.opts = {
+  llm = {
+    provider = "openai",
+    providers = {
+      ["openai"] = {
+        base_url = "https://api.openai.com/v1",
+        api_key = "",
+        model = "gpt-3.5-turbo",
+      }
+    }
+  },
+  always_update_description = false,  -- Set to true to always update description regardless of existing content
+}
+
 function M.get_front_matter_state()
   local content = vim.api.nvim_buf_get_lines(0, 0, -1, false)
 
@@ -120,6 +134,29 @@ function M.update_front_matter_state()
 
   -- Update lastmod
   front_matter_state.lastmod = util.get_iso_time()
+
+  -- Generate description using LLM if description is empty or auto update is enabled
+  if front_matter_state._auto_update and (front_matter_state.description == "" or M.opts.always_update_description) then
+    local llm = require("markdown-front-matter.llm")
+    local content = table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, false), "\n")
+
+    -- Remove the front matter to avoid confusing the LLM
+    local clean_content = content
+    if front_matter_state._end_line > 0 then
+      clean_content = table.concat(
+        vim.api.nvim_buf_get_lines(0, front_matter_state._end_line, -1, false),
+        "\n"
+      )
+    end
+
+    local description, err = llm.generate_description(clean_content, M.opts)
+    if description then
+      front_matter_state.description = description:gsub("\n", " "):gsub("^%s*(.-)%s*$", "%1")
+      vim.notify("[MarkdownFrontMatter] Description generated using LLM", vim.log.levels.INFO)
+    else
+      vim.notify("[MarkdownFrontMatter] Failed to generate description: " .. (err or "unknown error"), vim.log.levels.WARN)
+    end
+  end
 end
 
 function M.write_front_matter()

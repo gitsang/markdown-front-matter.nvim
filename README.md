@@ -32,7 +32,18 @@ use {
 ```lua
 {
   'gitsang/markdown-front-matter.nvim',
-  opts = {},
+  opts = {
+    llm = {
+      provider = "openai",
+      providers = {
+        ["openai"] = {
+          base_url = "https://api.openai.com/v1",
+          api_key = "YOUR_API_KEY",
+          model = "gpt-3.5-turbo",
+        }
+      }
+    }
+  },
 }
 ```
 
