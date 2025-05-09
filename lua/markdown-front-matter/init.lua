@@ -37,7 +37,7 @@ function M.load_front_matter_state()
   }
 
   -- Find front matter boundaries
-  local front_matter_start = nil
+  local front_matter_start = 1
   local front_matter_end = nil
   for i, line in ipairs(content) do
     if line:match(front_matter_flag) then
