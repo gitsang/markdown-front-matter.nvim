@@ -3,7 +3,7 @@ local M = {}
 -- Function to call OpenAI API
 local function call_openai(prompt, opts)
   local curl_cmd = string.format(
-    'curl -s -X POST "%s/chat/completions" '..
+    'curl -s -X POST "%s" '..
     '-H "Content-Type: application/json" '..
     '-H "Authorization: Bearer %s" '..
     '-d \'{"model":"%s","messages":[{"role":"user","content":"%s"}],"temperature":0.7}\' ',
