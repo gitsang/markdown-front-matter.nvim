@@ -133,7 +133,14 @@ function M.update_front_matter_state()
 
   -- Generate metadata using LLM
   local content = table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, false), "\n")
-  local metadata, err = llm.generate_metadata(content, M.opts)
+  local clean_content = content
+  if front_matter_state._end_line > 0 then
+    clean_content = table.concat(
+      vim.api.nvim_buf_get_lines(0, front_matter_state._end_line, -1, false),
+      "\n"
+    )
+  end
+  local metadata, err = llm.generate_metadata(clean_content, M.opts)
   if metadata == nil or err ~= nil then
     vim.notify("[MarkdownFrontMatter] Failed to generate metadata: " .. err, vim.log.levels.ERROR)
   else
