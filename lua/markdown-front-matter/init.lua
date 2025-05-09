@@ -12,7 +12,7 @@ local front_matter_state = {
   weight = 1,
   categories = {},
   tags = {},
-  _start_line = 0,
+  _start_line = 1,
   _end_line = 0,
   _auto_update = true,
 };
