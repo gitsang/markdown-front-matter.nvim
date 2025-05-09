@@ -106,7 +106,6 @@ function M.generate_front_matter_content()
   table.insert(lines, "---")
   table.insert(lines, "")
   table.insert(lines, front_matter_flag)
-  table.insert(lines, "")
 
   return lines
 end
