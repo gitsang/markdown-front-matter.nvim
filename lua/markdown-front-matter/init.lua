@@ -32,48 +32,41 @@ function M.load_front_matter_state()
     weight = 1,
     categories = {},
     tags = {},
-    _start_line = 1,
-    _end_line = 0,
+    _flag_line = 0,
   }
 
   -- Find front matter boundaries
-  local front_matter_start = 1
-  local front_matter_end = nil
   for i, line in ipairs(content) do
     if line:match(front_matter_flag) then
-      front_matter_end = i
+      front_matter_state._flag_line = i
       break
     end
   end
+  if front_matter_state._flag_line == 0 then
+    return
+  end
 
-  -- If boundaries are found
-  if front_matter_start and front_matter_end and front_matter_end > front_matter_start then
-    -- Update boundary information
-    front_matter_state._start_line = front_matter_start
-    front_matter_state._end_line = front_matter_end
+  -- Extract YAML content
+  local yaml_lines = {}
 
-    -- Extract YAML content
-    local yaml_lines = {}
-
-    for i = front_matter_start + 1, front_matter_end - 1 do
-      local line = content[i]
-      if not line:match(front_matter_flag) then
-        table.insert(yaml_lines, line)
-      end
+  for i = 1, front_matter_state._flag_line - 3 do
+    local line = content[i]
+    if not line:match(front_matter_flag) then
+      table.insert(yaml_lines, line)
     end
+  end
 
-    -- YAML Unmarshal using our custom yaml module
-    local yaml_content = table.concat(yaml_lines, '\n')
-    local success, parsed_data = pcall(yaml.load, yaml_content)  -- Using custom yaml.load
+  -- YAML Unmarshal using our custom yaml module
+  local yaml_content = table.concat(yaml_lines, '\n')
+  local success, parsed_data = pcall(yaml.load, yaml_content)  -- Using custom yaml.load
 
-    if success and parsed_data then
-      -- Merge parsed data into state
-      for k, v in pairs(parsed_data) do
-        front_matter_state[k] = v
-      end
-    else
-      vim.notify("YAML parsing error, using default values", vim.log.levels.WARN)
+  if success and parsed_data then
+    -- Merge parsed data into state
+    for k, v in pairs(parsed_data) do
+      front_matter_state[k] = v
     end
+  else
+    vim.notify("YAML parsing error, using default values", vim.log.levels.WARN)
   end
 end
 
@@ -110,7 +103,7 @@ function M.generate_front_matter_content()
   end
 
   table.insert(lines, "---")
-
+  table.insert(lines, "")
   table.insert(lines, front_matter_flag)
 
   return lines
@@ -127,9 +120,9 @@ function M.update_front_matter_state()
   -- Generate metadata using LLM
   local content = table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, false), "\n")
   local clean_content = content
-  if front_matter_state._end_line > 0 then
+  if front_matter_state._flag_line > 0 then
     clean_content = table.concat(
-      vim.api.nvim_buf_get_lines(0, front_matter_state._end_line, -1, false),
+      vim.api.nvim_buf_get_lines(0, front_matter_state._flag_line, -1, false),
       "\n"
     )
   end
@@ -156,7 +149,7 @@ function M.write_front_matter()
   M.load_front_matter_state()
   M.update_front_matter_state()
   local lines = M.generate_front_matter_content()
-  vim.api.nvim_buf_set_lines(0, front_matter_state._start_line - 1, front_matter_state._end_line, false, lines)
+  vim.api.nvim_buf_set_lines(0, 0, front_matter_state._flag_line, false, lines)
   vim.notify("[MarkdownFrontMatter] Front matter updated", vim.log.levels.INFO)
 end
 
