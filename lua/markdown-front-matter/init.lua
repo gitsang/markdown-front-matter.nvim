@@ -1,6 +1,6 @@
 local M = {}
 local util = require("markdown-front-matter.util")
-local lyaml = require('lyaml')
+local yaml = require("markdown-front-matter.yaml")
 
 local auto_update_flag = "<!-- markdown-front-matter auto -->"
 local front_matter_state = {
@@ -56,9 +56,9 @@ function M.get_front_matter_state()
       end
     end
 
-    -- YAML Unmarshal using lyaml
+    -- YAML Unmarshal using our custom yaml module
     local yaml_content = table.concat(yaml_lines, '\n')
-    local success, parsed_data = pcall(lyaml.load, yaml_content)
+    local success, parsed_data = pcall(yaml.load, yaml_content)  -- Using custom yaml.load
 
     if success and parsed_data then
       -- Merge parsed data into state
@@ -84,8 +84,8 @@ function M.generate_front_matter_content()
     end
   end
 
-  -- Convert the data to YAML format using lyaml
-  local yaml_content = lyaml.dump({yaml_data})
+  -- Convert the data to YAML format using our custom yaml module
+  local yaml_content = yaml.dump({yaml_data})  -- Using custom yaml.dump
 
   -- Create the front matter with delimiters
   local lines = {"---"}

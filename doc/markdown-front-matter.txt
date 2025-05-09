@@ -48,19 +48,13 @@ INSTALLATION                                           *md-frontmatter-installat
 -- packer.nvim
 use {
   'gitsang/markdown-front-matter.nvim',
-  requires = {'gvvaughan/lyaml'},  -- Required dependency
-  config = function()
-    require('markdown-front-matter').setup()
-  end
+  opts = {},
 }
 
 -- lazy.nvim
 {
   'gitsang/markdown-front-matter.nvim',
-  dependencies = {'gvvaughan/lyaml'},
-  config = function()
-    require('markdown-front-matter').setup()
-  end
+  opts = {},
 }
 ```
 

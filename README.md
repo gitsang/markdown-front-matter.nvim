@@ -23,10 +23,7 @@ A Neovim plugin for automated Markdown front matter generation and management.
 ```lua
 use {
   'gitsang/markdown-front-matter.nvim',
-  requires = {'gvvaughan/lyaml'},
-  config = function()
-    require('markdown-front-matter').setup()
-  end
+  opts = {},
 }
 ```
 
@@ -35,10 +32,7 @@ use {
 ```lua
 {
   'gitsang/markdown-front-matter.nvim',
-  dependencies = {'gvvaughan/lyaml'},
-  config = function()
-    require('markdown-front-matter').setup()
-  end
+  opts = {},
 }
 ```
 
