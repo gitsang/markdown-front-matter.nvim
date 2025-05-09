@@ -1,6 +1,7 @@
 local M = {}
 local util = require("markdown-front-matter.util")
 local yaml = require("markdown-front-matter.yaml")
+local llm = require("markdown-front-matter.llm")
 
 local auto_update_flag = "<!-- markdown-front-matter auto -->"
 local front_matter_state = {
@@ -136,8 +137,7 @@ function M.update_front_matter_state()
   front_matter_state.lastmod = util.get_iso_time()
 
   -- Generate description using LLM if description is empty or auto update is enabled
-  if front_matter_state._auto_update and (front_matter_state.description == "" or M.opts.always_update_description) then
-    local llm = require("markdown-front-matter.llm")
+  if front_matter_state.description == "" or M.opts.always_update_description then
     local content = table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, false), "\n")
 
     -- Remove the front matter to avoid confusing the LLM
