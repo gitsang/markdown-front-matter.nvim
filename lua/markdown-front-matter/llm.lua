@@ -1,33 +1,45 @@
 local M = {}
 
--- Function to call OpenAI API
 local function call_openai(prompt, opts)
-  local curl_cmd = string.format(
-    'curl -s -X POST "%s" '..
-    '-H "Content-Type: application/json" '..
-    '-H "Authorization: Bearer %s" '..
-    '-d \'{"model":"%s","messages":[{"role":"user","content":"%s"}]}\' ',
-    opts.base_url,
-    opts.api_key,
-    opts.model,
-    prompt:gsub('"', '\\"'):gsub("'", "\'\'"):gsub('\n', '\\n'):gsub('\t', '\\t')
-  )
-
-  vim.notify("[MarkdownFrontMatter] " .. curl_cmd, vim.log.levels.DEBUG)
-  local handle = io.popen(curl_cmd)
-  if not handle then
-    return nil, "Failed to execute curl command"
+  -- Check if plenary is available
+  local has_plenary, curl = pcall(require, 'plenary.curl')
+  if not has_plenary then
+    return nil, "plenary.nvim is required for HTTP requests"
   end
 
-  local result = handle:read("*a")
-  handle:close()
+  -- Prepare the request body
+  local body = vim.json.encode({
+    model = opts.model,
+    messages = {
+      {
+        role = "user",
+        content = prompt
+      }
+    }
+  })
 
-  local success, response = pcall(vim.json.decode, result)
-  if not success or not response.choices or not response.choices[1] then
-    return nil, "Failed to parse API response: " .. result
+  -- Make the HTTP request
+  local response = curl.post(opts.base_url, {
+    headers = {
+      ["Content-Type"] = "application/json",
+      ["Authorization"] = "Bearer " .. opts.api_key
+    },
+    body = body
+  })
+
+  -- Check for errors in the response
+  if not response or response.status ~= 200 then
+    local err_msg = response and response.body or "No response from API"
+    return nil, "API request failed: " .. err_msg
   end
 
-  return response.choices[1].message.content
+  -- Parse the JSON response
+  local success, parsed = pcall(vim.json.decode, response.body)
+  if not success or not parsed.choices or not parsed.choices[1] then
+    return nil, "Failed to parse API response: " .. response.body
+  end
+
+  return parsed.choices[1].message.content
 end
 
 -- New function to generate all metadata fields
