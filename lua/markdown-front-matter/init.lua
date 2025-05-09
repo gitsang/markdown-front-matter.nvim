@@ -1,85 +1,122 @@
 local M = {}
+local util = require("markdown-front-matter.util")
+local yaml = require('plenary.filetype.yaml')
 
-local flag = "<!-- markdown auto front matter -->"
+local auto_update_flag = "<!-- markdown-front-matter auto -->"
+local front_matter_state = {
+  title = "",
+  slug = "",
+  description = "",
+  date = "",
+  lastmod = "",
+  weight = 1,
+  categories = {},
+  tags = {},
+  _start_line = 0,
+  _end_line = 0,
+  _auto_update = true,
+};
 
-local function kebab_case(filename)
-  return filename:lower()
-    :gsub("%s+", "-")
-    :gsub("_", "-")
-    :gsub("[^%w-]", "")
-    :gsub("-+", "-")
-    :gsub("^%-", "")
-    :gsub("%-$", "")
-end
-
-local function get_iso_time()
-  local time = os.date("*t")
-  return string.format("%04d-%02d-%02dT%02d:%02d:%02d+08:00",
-    time.year, time.month, time.day, time.hour, time.min, time.sec)
-end
-
-function M.insert_frontmatter()
-  local bufname = vim.api.nvim_buf_get_name(0)
-  local filename = vim.fn.fnamemodify(bufname, ":t:r")
-  local slug = kebab_case(filename)
-  local datetime = get_iso_time()
-  
-  local frontmatter = {
-    "---",
-    string.format('title: ""'),
-    string.format('slug: "%s"', slug),
-    'description: ""',
-    string.format('date: "%s"', datetime),
-    string.format('lastmod: "%s"', datetime),
-    'weight: 1',
-    'categories:',
-    'tags:',
-    "",
-    flag,
-    "---"
-    "",
-  }
-  
-  vim.api.nvim_buf_set_lines(0, 0, 0, false, frontmatter)
-end
-
-local function update_lastmod()
+function M.get_front_matter_state()
   local content = vim.api.nvim_buf_get_lines(0, 0, -1, false)
-  local datetime = M.get_iso_time()
-  
+
+  -- Initialize front_matter_state with default values
+  local state = front_matter_state
+
+  -- Find front matter boundaries
+  local front_matter_start = nil
+  local front_matter_end = nil
   for i, line in ipairs(content) do
-    if line:match(flag) then
-      for j = i, 1, -1 do
-        if content[j]:match("^lastmod:") then
-          content[j] = string.format('lastmod: "%s"', datetime)
-          vim.api.nvim_buf_set_lines(0, 0, -1, false, content)
-          return
-        end
+    if line:match("^%-%-%-") then
+      if front_matter_start == nil then
+        front_matter_start = i
+      else
+        front_matter_end = i
+        break
       end
     end
   end
+
+  -- If boundaries are found
+  if front_matter_start and front_matter_end and front_matter_end > front_matter_start then
+    -- Update boundary information
+    state._start_line = front_matter_start
+    state._end_line = front_matter_end
+
+    -- Extract YAML content
+    local yaml_lines = {}
+
+    for i = front_matter_start + 1, front_matter_end - 1 do
+      local line = content[i]
+      -- Check for auto update flag
+      if line:match(auto_update_flag) then
+        state._auto_update = true
+      else
+        table.insert(yaml_lines, line)
+      end
+    end
+
+    -- YAML Unmarshal
+    local yaml_content = table.concat(yaml_lines, '\n')
+    local success, parsed_data = pcall(yaml.parse, yaml_content)
+
+    if success and parsed_data then
+      -- Merge parsed data into state
+      for k, v in pairs(parsed_data) do
+        state[k] = v
+      end
+      return state
+    else
+      vim.notify("YAML parsing error, using default values", vim.log.levels.WARN)
+      return state
+    end
+  end
+
+  return state -- Return default state if no front matter found
+end
+
+function M.generate_front_matter_content()
+  -- Create a copy of front_matter_state without the `_` prefix field
+  local yaml_data = {}
+  for k, v in pairs(front_matter_state) do
+    if not k:match("^_") then
+      yaml_data[k] = v
+    end
+  end
+
+  -- Convert the data to YAML format using plenary
+  local yaml_content = yaml.stringify(yaml_data)
+
+  -- Create the front matter with delimiters
+  local lines = {"---"}
+
+  -- Add yaml content, splitting by newlines
+  for line in string.gmatch(yaml_content, "[^\r\n]+") do
+    table.insert(lines, line)
+  end
+
+  -- Add auto update flag if needed
+  if front_matter_state["_auto_update"] then
+    table.insert(lines, "")
+    table.insert(lines, auto_update_flag)
+  end
+
+  table.insert(lines, "---")
+  table.insert(lines, "")
+
+  return lines
+end
+
+function M.write_front_matter()
+  local state = M.get_front_matter_state()
+  local lines = M.generate_front_matter_content()
+  vim.api.nvim_buf_set_lines(0, state._start_line - 1, state._end_line, false, lines)
+  vim.notify("[MarkdownFrontMatter] Front matter updated", vim.log.levels.INFO)
 end
 
 local function setup()
-  vim.api.nvim_create_autocmd("BufWritePre", {
-    pattern = "*.md",
-    callback = function()
-      local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
-      for _, line in ipairs(lines) do
-        if line:match(flag) then
-        update_lastmod()
-      end
-    end
-  })
-
-  vim.api.nvim_create_user_command("MarkdownFrontMatterInit", function()
-    local lines = vim.api.nvim_buf_get_lines(0, 0, 1, false)
-    if #lines > 0 and lines[1]:match("^%-%-%-") then
-      print("Front Matter already exists")
-      return
-    end
-    
-    M.insert_frontmatter()
+  vim.api.nvim_create_user_command("MarkdownFrontMatter", function()
+    M.write_front_matter()
   end, {})
 end
 
