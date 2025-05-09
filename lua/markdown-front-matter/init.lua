@@ -116,8 +116,11 @@ function M.generate_front_matter_content()
       local field_yaml = yaml.dump({[key] = value})
       -- Remove the document start/end markers from the field yaml
       field_yaml = field_yaml:gsub("^%-%-%-\n", ""):gsub("\n%.%.%.$", "")
-      -- Add the field to our lines
-      table.insert(lines, field_yaml)
+
+      -- Split the field_yaml by newlines and add each line
+      for line in field_yaml:gmatch("[^\r\n]+") do
+        table.insert(lines, line)
+      end
     end
   end
 
