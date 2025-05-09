@@ -30,6 +30,9 @@ function M.get_front_matter_state()
     if line:match("^%-%-%-") then
       if front_matter_start == nil then
         front_matter_start = i
+        if front_matter_start ~= 1 then
+          return state -- Return default state if no front matter found
+        end
       else
         front_matter_end = i
         break
