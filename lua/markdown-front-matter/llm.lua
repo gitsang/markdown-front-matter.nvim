@@ -10,7 +10,7 @@ local function call_openai(prompt, opts)
     opts.base_url,
     opts.api_key,
     opts.model,
-    prompt:gsub('"', '\\"')
+    prompt:gsub('"', '\\"'):gsub('\n', '\\n')
   )
 
   local handle = io.popen(curl_cmd)
