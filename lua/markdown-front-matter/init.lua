@@ -148,6 +148,7 @@ function M.update_front_matter_state()
         "\n"
       )
     end
+    vim.notify("[MarkdownFrontMatter] LLM input len: " .. string.len(clean_content) ,vim.log.levels.INFO)
 
     local description, err = llm.generate_description(clean_content, M.opts)
     if err then
