@@ -40,9 +40,6 @@ function M.load_front_matter_state()
   local front_matter_start = nil
   local front_matter_end = nil
   for i, line in ipairs(content) do
-    if i == 1 and not line:match("^%-%-%-") then
-      return
-    end
     if line:match(front_matter_flag) then
       front_matter_end = i
       break
