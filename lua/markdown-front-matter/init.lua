@@ -150,18 +150,12 @@ function M.update_front_matter_state()
         "\n"
       )
     end
-    vim.notify("[MarkdownFrontMatter] LLM input len: " .. string.len(clean_content) ,vim.log.levels.INFO)
 
     local description, err = llm.generate_description(clean_content, M.opts)
-    if err then
-      vim.notify("[MarkdownFrontMatter] Error generating description: " .. err, vim.log.levels.WARN)
-    end
-    vim.notify("[MarkdownFrontMatter] LLM response: " .. (description or "nil"), vim.log.levels.INFO)
-    if description then
-      front_matter_state.description = description:gsub("\n", " "):gsub("^%s*(.-)%s*$", "%1")
-      vim.notify("[MarkdownFrontMatter] Description generated using LLM", vim.log.levels.INFO)
+    if err or not description then
+      vim.notify("[MarkdownFrontMatter] Error generating description: " .. (err or "unknown error"), vim.log.levels.WARN)
     else
-      vim.notify("[MarkdownFrontMatter] Failed to generate description: " .. (err or "unknown error"), vim.log.levels.WARN)
+      front_matter_state.description = description:gsub("\n", " "):gsub("^%s*(.-)%s*$", "%1")
     end
   end
 end

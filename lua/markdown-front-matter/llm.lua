@@ -35,6 +35,8 @@ function M.generate_description(content, opts)
     return nil, "LLM provider not configured"
   end
 
+  vim.notify("[MarkdownFrontMatter] Generating description using " .. opts.llm.provider, vim.log.levels.INFO)
+
   local provider = opts.llm.provider
   local provider_opts = opts.llm.providers[provider]
 
