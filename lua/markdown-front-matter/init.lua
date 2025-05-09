@@ -129,8 +129,8 @@ function M.update_front_matter_state()
   front_matter_state.slug = util.kebab_case(vim.fn.expand("%:t:r"))
 
   -- Update date if empty
-  vim.notify("[MarkdownFrontMatter] date: " .. front_matter_state.date, vim.log.levels.INFO)
-  if front_matter_state.date == "" then
+  vim.notify("[MarkdownFrontMatter] date: " .. vim.inspect(front_matter_state.date), vim.log.levels.INFO)
+  if front_matter_state.date == "" or type(front_matter_state.date) == "table" then
     front_matter_state.date = util.get_iso_time()
   end
 
@@ -138,7 +138,7 @@ function M.update_front_matter_state()
   front_matter_state.lastmod = util.get_iso_time()
 
   -- Generate description using LLM if description is empty or auto update is enabled
-  vim.notify("[MarkdownFrontMatter] description: " .. front_matter_state.description, vim.log.levels.INFO)
+  vim.notify("[MarkdownFrontMatter] description: " .. vim.inspect(front_matter_state.description), vim.log.levels.INFO)
   if front_matter_state.description == "" or M.opts.always_update_description then
     vim.notify("[MarkdownFrontMatter] Generating description using LLM", vim.log.levels.INFO)
     local content = table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, false), "\n")
