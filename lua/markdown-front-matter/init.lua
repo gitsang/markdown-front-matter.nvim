@@ -168,12 +168,17 @@ function M.write_front_matter()
   vim.notify("[MarkdownFrontMatter] Front matter updated", vim.log.levels.INFO)
 end
 
-local function setup()
+function M.setup(opts)
+  -- Merge user options with defaults
+  if opts then
+    M.opts = vim.tbl_deep_extend("force", M.opts, opts)
+  end
+
   vim.api.nvim_create_user_command("MarkdownFrontMatter", function()
     M.write_front_matter()
   end, {})
 end
 
 return {
-  setup = setup
+  setup = M.setup
 }
