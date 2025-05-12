@@ -118,6 +118,12 @@ function M.update_front_matter_state()
   end
   front_matter_state.lastmod = util.get_iso_time()
 
+  -- Get categories from parent directory name
+  local parent_dir = vim.fn.fnamemodify(vim.fn.expand("%:p"), ":h:t")
+  if parent_dir ~= "" then
+    front_matter_state.categories = {parent_dir}
+  end
+
   -- Generate metadata using LLM
   local content = table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, false), "\n")
   local clean_content = content
@@ -136,9 +142,6 @@ function M.update_front_matter_state()
     end
     if front_matter_state.description == "" or type(front_matter_state.description) == "table" then
       front_matter_state.description = metadata.description:gsub("\n", " "):gsub("^%s*(.-)%s*$", "%1")
-    end
-    if front_matter_state.categories == {} or type(front_matter_state.categories) == "table" then
-      front_matter_state.categories = metadata.categories
     end
     if front_matter_state.tags == {} or type(front_matter_state.tags) == "table" then
       front_matter_state.tags = metadata.tags

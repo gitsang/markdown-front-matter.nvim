@@ -5,9 +5,10 @@ A Neovim plugin for automated Markdown front matter generation and management.
 ## 1. Features
 
 - **Generate Front Matter**: Generate YAML front matter for Markdown documents.
-- **Generate metadata by llm**: Use llm to generate metadata(title, description, categories, tags)
+- **Generate metadata by llm**: Use llm to generate metadata(title, description, tags)
 - **Intelligent Formatting**:
   - Auto-generated slugs in kebab-case from filenames
+  - Categories derived from parent directory name
   - ISO 8601 compliant dates with timezone information
 
 ## 2. Installation

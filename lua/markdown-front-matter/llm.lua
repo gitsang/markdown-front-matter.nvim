@@ -62,14 +62,12 @@ function M.generate_metadata(content, opts)
 Based on the following markdown content, please generate ONLY the following metadata in JSON format:
 1. title: A concise, descriptive title (1 line)
 2. description: A brief summary (1-2 sentences)
-3. categories: An array of 1-3 broad categories that the content belongs to
-4. tags: An array of 3-7 specific keywords or phrases related to the content
+3. tags: An array of 3-7 specific keywords or phrases related to the content
 
 Return ONLY valid JSON in this exact format without explanations, do not include triple backticks (```):
 {
   "title": "...",
   "description": "...",
-  "categories": ["...", "..."],
   "tags": ["...", "...", "..."]
 }
 
