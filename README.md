@@ -2,6 +2,8 @@
 
 A Neovim plugin for automated Markdown front matter generation and management.
 
+![](./.resources/overview.gif)
+
 ## 1. Features
 
 - **Generate Front Matter**: Generate YAML front matter for Markdown documents.
